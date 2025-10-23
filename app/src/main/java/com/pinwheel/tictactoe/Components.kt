@@ -47,15 +47,18 @@ import kotlin.math.min
 
 // --- Models ---
 private enum class CellState { EMPTY, X, O }
-private enum class ScreenState { MODE, DIFFICULTY, GAME }
+private enum class ScreenState { MODE, DIFFICULTY, GAME, RESULT }
 private enum class Difficulty { EASY, MEDIUM, HARD }
 private enum class PlayerMode { SINGLE, MULTI }
+private enum class GameResult { X_WIN, O_WIN, DRAW }
 
 @Composable
 fun TicTacToeMainActivityContent() {
     var screen by remember { mutableStateOf(ScreenState.MODE) }
     var playerMode by remember { mutableStateOf(PlayerMode.SINGLE) }
     var difficulty by remember { mutableStateOf(Difficulty.MEDIUM) }
+    var gameResult by remember { mutableStateOf<GameResult?>(null) }
+    var finalBoard by remember { mutableStateOf(List(9) { CellState.EMPTY }) }
 
     MaterialTheme {
         Surface(modifier = Modifier.fillMaxSize(), color = MaterialTheme.colorScheme.background) {
@@ -71,7 +74,21 @@ fun TicTacToeMainActivityContent() {
                 ScreenState.GAME -> GameScreenHost(
                     playerMode = playerMode,
                     difficulty = difficulty,
-                    onBackToMode = { screen = ScreenState.MODE }
+                    onBackToMode = { screen = ScreenState.MODE },
+                    onGameResult = { result, board ->
+                        gameResult = result
+                        finalBoard = board
+                        screen = ScreenState.RESULT
+                    }
+                )
+                ScreenState.RESULT -> ResultScreen(
+                    result = gameResult ?: GameResult.DRAW,
+                    board = finalBoard,
+                    onStartOver = {
+                        screen = ScreenState.MODE
+                        gameResult = null
+                        finalBoard = List(9) { CellState.EMPTY }
+                    }
                 )
             }
         }
@@ -135,13 +152,53 @@ private fun DifficultyScreen(onPick: (Difficulty) -> Unit, onBack: () -> Unit) {
 }
 
 @Composable
-private fun GameScreenHost(playerMode: PlayerMode, difficulty: Difficulty, onBackToMode: () -> Unit) {
+private fun ResultScreen(
+    result: GameResult,
+    board: List<CellState>,
+    onStartOver: () -> Unit
+) {
+    BackHandler { onStartOver() }
+    Box(
+        modifier = Modifier.fillMaxSize().background(MaterialTheme.colorScheme.background).padding(20.dp),
+        contentAlignment = Alignment.Center
+    ) {
+        Column(
+            horizontalAlignment = Alignment.CenterHorizontally,
+            verticalArrangement = Arrangement.Center,
+            modifier = Modifier.fillMaxSize()
+        ) {
+            // Result message
+            Text(
+                text = when (result) {
+                    GameResult.X_WIN -> "X Wins!"
+                    GameResult.O_WIN -> "O Wins!"
+                    GameResult.DRAW -> "It's a Draw!"
+                },
+                style = MaterialTheme.typography.headlineLarge,
+                color = MaterialTheme.colorScheme.onBackground
+            )
+
+            Spacer(Modifier.height(32.dp))
+
+            // Start Over button
+            IconTextButton(
+                imageVector = null,
+                buttonText = "Start Over",
+                onClick = onStartOver
+            )
+        }
+    }
+}
+
+@Composable
+private fun GameScreenHost(playerMode: PlayerMode, difficulty: Difficulty, onBackToMode: () -> Unit, onGameResult: (GameResult, List<CellState>) -> Unit) {
     Column(modifier = Modifier.fillMaxSize().background(MaterialTheme.colorScheme.background)) {
         Box(modifier = Modifier.fillMaxSize()) {
             ResponsiveTicTacToe(
                 isSinglePlayer = (playerMode == PlayerMode.SINGLE),
                 difficulty = difficulty,
-                onExitToMode = onBackToMode
+                onExitToMode = onBackToMode,
+                onGameResult = onGameResult
             )
         }
     }
@@ -154,7 +211,8 @@ private fun GameScreenHost(playerMode: PlayerMode, difficulty: Difficulty, onBac
 private fun ResponsiveTicTacToe(
     isSinglePlayer: Boolean,
     difficulty: Difficulty,
-    onExitToMode: () -> Unit
+    onExitToMode: () -> Unit,
+    onGameResult: (GameResult, List<CellState>) -> Unit
 ) {
     // game state
     var board by remember { mutableStateOf(List(9) { CellState.EMPTY }) }
@@ -198,21 +256,21 @@ private fun ResponsiveTicTacToe(
             winAnim.snapTo(0f)
             winAnim.animateTo(1f, tween(600, easing = FastOutSlowInEasing))
 
-            // Keep winning line visible before reset
+            // Keep winning line visible before showing result
             delay(1200)
 
-            // Reset board and animations
-            board = List(9) { CellState.EMPTY }
-            winningLine = null
-            xTurn = true
-            cellAnim.forEach { it.snapTo(0f) }
-            winAnim.snapTo(0f)
+            // Determine winner and show result screen
+            val winner = board[win[0]]
+            val result = when (winner) {
+                CellState.X -> GameResult.X_WIN
+                CellState.O -> GameResult.O_WIN
+                else -> GameResult.DRAW
+            }
+            onGameResult(result, board)
         } else if (board.none { it == CellState.EMPTY }) {
-            // draw -> auto-reset
+            // draw -> show result screen
             delay(1000)
-            board = List(9) { CellState.EMPTY }
-            xTurn = true
-            cellAnim.forEach { it.snapTo(0f) }
+            onGameResult(GameResult.DRAW, board)
         }
     }
 
