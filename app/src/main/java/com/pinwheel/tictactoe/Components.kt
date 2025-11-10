@@ -21,7 +21,6 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -37,62 +36,17 @@ import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.drawscope.DrawScope
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.unit.dp
+import com.pinwheel.tictactoe.enums.CellState
+import com.pinwheel.tictactoe.enums.Difficulty
+import com.pinwheel.tictactoe.enums.GameResult
+import com.pinwheel.tictactoe.enums.PlayerMode
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.joinAll
 import kotlinx.coroutines.launch
 import kotlin.math.min
 
-// --- Models ---
-private enum class CellState { EMPTY, X, O }
-private enum class ScreenState { MODE, DIFFICULTY, GAME, RESULT }
-private enum class Difficulty { EASY, MEDIUM, HARD }
-private enum class PlayerMode { SINGLE, MULTI }
-private enum class GameResult { X_WIN, O_WIN, DRAW }
-
 @Composable
-fun TicTacToeMainActivityContent() {
-    var screen by remember { mutableStateOf(ScreenState.MODE) }
-    var playerMode by remember { mutableStateOf(PlayerMode.SINGLE) }
-    var difficulty by remember { mutableStateOf(Difficulty.MEDIUM) }
-    var gameResult by remember { mutableStateOf<GameResult?>(null) }
-    var finalBoard by remember { mutableStateOf(List(9) { CellState.EMPTY }) }
-
-    MaterialTheme {
-        Surface(modifier = Modifier.fillMaxSize(), color = MaterialTheme.colorScheme.background) {
-            when (screen) {
-                ScreenState.MODE -> ModeScreen(
-                    onSingle = { playerMode = PlayerMode.SINGLE; screen = ScreenState.DIFFICULTY },
-                    onMulti = { playerMode = PlayerMode.MULTI; screen = ScreenState.GAME }
-                )
-                ScreenState.DIFFICULTY -> DifficultyScreen(
-                    onPick = { difficulty = it; screen = ScreenState.GAME },
-                    onBack = { screen = ScreenState.MODE }
-                )
-                ScreenState.GAME -> GameScreenHost(
-                    playerMode = playerMode,
-                    difficulty = difficulty,
-                    onBackToMode = { screen = ScreenState.MODE },
-                    onGameResult = { result, board ->
-                        gameResult = result
-                        finalBoard = board
-                        screen = ScreenState.RESULT
-                    }
-                )
-                ScreenState.RESULT -> ResultScreen(
-                    result = gameResult ?: GameResult.DRAW,
-                    onStartOver = {
-                        screen = ScreenState.MODE
-                        gameResult = null
-                        finalBoard = List(9) { CellState.EMPTY }
-                    }
-                )
-            }
-        }
-    }
-}
-
-@Composable
-private fun ModeScreen(onSingle: () -> Unit, onMulti: () -> Unit) {
+fun ModeScreen(onSingle: () -> Unit, onMulti: () -> Unit) {
     Box(
         modifier = Modifier.fillMaxSize().background(MaterialTheme.colorScheme.background).padding(20.dp),
         contentAlignment = Alignment.Center
@@ -116,7 +70,7 @@ private fun ModeScreen(onSingle: () -> Unit, onMulti: () -> Unit) {
 }
 
 @Composable
-private fun DifficultyScreen(onPick: (Difficulty) -> Unit, onBack: () -> Unit) {
+fun DifficultyScreen(onPick: (Difficulty) -> Unit, onBack: () -> Unit) {
     BackHandler { onBack() }
     Box(
         modifier = Modifier.fillMaxSize().background(MaterialTheme.colorScheme.background).padding(20.dp),
@@ -148,7 +102,7 @@ private fun DifficultyScreen(onPick: (Difficulty) -> Unit, onBack: () -> Unit) {
 }
 
 @Composable
-private fun ResultScreen(
+fun ResultScreen(
     result: GameResult,
     onStartOver: () -> Unit
 ) {
@@ -186,7 +140,7 @@ private fun ResultScreen(
 }
 
 @Composable
-private fun GameScreenHost(playerMode: PlayerMode, difficulty: Difficulty, onBackToMode: () -> Unit, onGameResult: (GameResult, List<CellState>) -> Unit) {
+fun GameScreenHost(playerMode: PlayerMode, difficulty: Difficulty, onBackToMode: () -> Unit, onGameResult: (GameResult, List<CellState>) -> Unit) {
     Column(modifier = Modifier.fillMaxSize().background(MaterialTheme.colorScheme.background)) {
         Box(modifier = Modifier.fillMaxSize()) {
             ResponsiveTicTacToe(
