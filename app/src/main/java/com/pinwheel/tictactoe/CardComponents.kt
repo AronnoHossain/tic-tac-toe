@@ -12,7 +12,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import com.pinwheel.tictactoe.Wp.wp
+import com.pinwheel.tictactoe.theme.Wp.wp
 
 /**
  * A composable card that arranges its content in a horizontal row.

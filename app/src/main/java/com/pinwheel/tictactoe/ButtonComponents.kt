@@ -49,7 +49,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
-import com.pinwheel.tictactoe.Wp.wp
+import com.pinwheel.tictactoe.theme.Wp.wp
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 
