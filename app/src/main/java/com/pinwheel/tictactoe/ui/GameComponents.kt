@@ -166,6 +166,7 @@ private fun ResponsiveTicTacToe(
     var board by remember { mutableStateOf(List(9) { CellState.EMPTY }) }
     var xTurn by remember { mutableStateOf(true) } // X starts
     var winningLine by remember { mutableStateOf<IntArray?>(null) }
+    var isDraw by remember { mutableStateOf(false) }
 
     // animation / AI state
     val scope = rememberCoroutineScope()
@@ -225,6 +226,7 @@ private fun ResponsiveTicTacToe(
     // AI behavior (single-player): scanning + thinking + move
     LaunchedEffect(xTurn, isSinglePlayer, board, winningLine) {
         if (isSinglePlayer && !xTurn && winningLine == null) {
+            if (findWinningLine(board) != null) return@LaunchedEffect
             isAiThinking = true
             // scanning highlight
             val scanJob = scope.launch {
@@ -247,8 +249,18 @@ private fun ResponsiveTicTacToe(
 
             val move = computeAIMove(board, difficulty)
             if (move != -1) {
-                board = board.toMutableList().apply { this[move] = CellState.O }
-                xTurn = true
+                val newBoard = board.toMutableList().apply { this[move] = CellState.O }
+                val win = findWinningLine(newBoard)
+                val draw = newBoard.none { it == CellState.EMPTY }
+
+                board = newBoard
+                if (win != null) {
+                    winningLine = win
+                } else if (draw) {
+                    isDraw = true
+                } else {
+                    xTurn = true
+                }
             }
             scanJob.cancel()
             aiFocusIndex = null
@@ -258,7 +270,7 @@ private fun ResponsiveTicTacToe(
 
     // turn label
     val turnLabel = when {
-        winningLine != null -> "Game Over"
+        winningLine != null || isDraw -> "Game Over"
         isSinglePlayer && isAiThinking -> "AI is thinking"
         xTurn -> "X's turn"
         else -> "O's turn"
@@ -301,8 +313,16 @@ private fun ResponsiveTicTacToe(
                             val idx = row * 3 + col
 
                             if (board[idx] == CellState.EMPTY) {
-                                board = board.toMutableList().apply { this[idx] = if (xTurn) CellState.X else CellState.O }
-                                xTurn = !xTurn
+                                val newBoard = board.toMutableList().apply { this[idx] = if (xTurn) CellState.X else CellState.O }
+                                val win = findWinningLine(newBoard)
+                                val draw = newBoard.none { it == CellState.EMPTY }
+
+                                board = newBoard
+                                when {
+                                    win != null -> winningLine = win
+                                    draw -> isDraw = true
+                                    else -> xTurn = !xTurn
+                                }
                             }
                         }
                     }
