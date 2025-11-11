@@ -344,8 +344,8 @@ private fun ResponsiveTicTacToe(
                         val y = startY + row * cellSize
                         val p = cellAnim[i].value
                         when (board[i]) {
-                            CellState.X -> drawAnimatedX(x, y, cellSize, margin, stroke, p, errorColor)
-                            CellState.O -> drawAnimatedO(x, y, cellSize, stroke, p, primaryColor)
+                            CellState.X -> drawAnimatedX(x, y, cellSize, margin, stroke, p, primaryColor)
+                            CellState.O -> drawAnimatedO(x, y, cellSize, stroke, p, errorColor)
                             else -> {}
                         }
                     }
