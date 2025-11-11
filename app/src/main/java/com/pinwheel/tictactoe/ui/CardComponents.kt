@@ -1,4 +1,4 @@
-package com.pinwheel.tictactoe
+package com.pinwheel.tictactoe.ui
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column

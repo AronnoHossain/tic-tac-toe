@@ -11,7 +11,7 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.TicTacToe" >
 
-        <activity android:name=".LauncherActivity"
+        <activity android:name=".ui.LauncherActivity"
             android:exported="true"
             android:launchMode="singleTask">
             <intent-filter>

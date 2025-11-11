@@ -1,4 +1,4 @@
-package com.pinwheel.tictactoe
+package com.pinwheel.tictactoe.ui
 
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.core.MutableTransitionState

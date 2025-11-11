@@ -1,4 +1,4 @@
-package com.pinwheel.tictactoe
+package com.pinwheel.tictactoe.ui
 
 import androidx.activity.compose.BackHandler
 import androidx.compose.animation.core.Animatable
@@ -33,7 +33,9 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Size
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.drawscope.DrawScope
+import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.unit.dp
 import com.pinwheel.tictactoe.enums.CellState
@@ -102,10 +104,7 @@ fun DifficultyScreen(onPick: (Difficulty) -> Unit, onBack: () -> Unit) {
 }
 
 @Composable
-fun ResultScreen(
-    result: GameResult,
-    onStartOver: () -> Unit
-) {
+fun ResultScreen(result: GameResult, onStartOver: () -> Unit) {
     BackHandler { onStartOver() }
     Box(
         modifier = Modifier.fillMaxSize().background(MaterialTheme.colorScheme.background).padding(20.dp),
@@ -368,7 +367,7 @@ private fun ResponsiveTicTacToe(
 /* ----------------------
    Draw helpers (pure DrawScope)
    ---------------------- */
-private fun DrawScope.drawAnimatedX(x: Float, y: Float, cellSize: Float, margin: Float, stroke: Float, progress: Float, color: androidx.compose.ui.graphics.Color) {
+private fun DrawScope.drawAnimatedX(x: Float, y: Float, cellSize: Float, margin: Float, stroke: Float, progress: Float, color: Color) {
     val len = (cellSize - 2f * margin) * progress
     val sx = x + margin
     val sy = y + margin
@@ -376,11 +375,11 @@ private fun DrawScope.drawAnimatedX(x: Float, y: Float, cellSize: Float, margin:
     drawLine(color, Offset(sx, y + cellSize - margin), Offset(sx + len, y + cellSize - margin - len), strokeWidth = stroke)
 }
 
-private fun DrawScope.drawAnimatedO(x: Float, y: Float, cellSize: Float, stroke: Float, progress: Float, color: androidx.compose.ui.graphics.Color) {
+private fun DrawScope.drawAnimatedO(x: Float, y: Float, cellSize: Float, stroke: Float, progress: Float, color: Color) {
     // draw arc that sweeps from -90 to -90 + 360 * progress
     val inset = cellSize * 0.12f
     val size = Size(cellSize - inset * 2f, cellSize - inset * 2f)
-    drawArc(color = color, startAngle = -90f, sweepAngle = 360f * progress, useCenter = false, topLeft = Offset(x + inset, y + inset), size = size, style = androidx.compose.ui.graphics.drawscope.Stroke(width = stroke))
+    drawArc(color = color, startAngle = -90f, sweepAngle = 360f * progress, useCenter = false, topLeft = Offset(x + inset, y + inset), size = size, style = Stroke(width = stroke))
 }
 
 private fun cellCenter(index: Int, startX: Float, startY: Float, cellSize: Float): Offset {
