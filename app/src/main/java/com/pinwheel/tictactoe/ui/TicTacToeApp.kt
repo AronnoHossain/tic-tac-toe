@@ -38,7 +38,7 @@ fun TicTacToe() = AppTheme(dynamicColor = false) {
                 playerMode = playerMode,
                 difficulty = difficulty,
                 onBackToMode = { screen = ScreenState.MODE },
-                onGameResult = { result, board ->
+                onGameResult = { result->
                     gameResult = result
                     screen = ScreenState.RESULT
                 }
@@ -46,6 +46,10 @@ fun TicTacToe() = AppTheme(dynamicColor = false) {
 
             ScreenState.RESULT -> ResultScreen(
                 result = gameResult ?: GameResult.DRAW,
+                onPlayAgain = {
+                    screen = ScreenState.GAME
+                    gameResult = null
+                },
                 onStartOver = {
                     screen = ScreenState.MODE
                     gameResult = null

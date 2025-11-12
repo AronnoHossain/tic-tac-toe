@@ -104,7 +104,7 @@ fun DifficultyScreen(onPick: (Difficulty) -> Unit, onBack: () -> Unit) {
 }
 
 @Composable
-fun ResultScreen(result: GameResult, onStartOver: () -> Unit) {
+fun ResultScreen(result: GameResult, onPlayAgain: () -> Unit, onStartOver: () -> Unit) {
     BackHandler { onStartOver() }
     Box(
         modifier = Modifier.fillMaxSize().background(MaterialTheme.colorScheme.background).padding(20.dp),
@@ -131,6 +131,14 @@ fun ResultScreen(result: GameResult, onStartOver: () -> Unit) {
             // Start Over button
             IconTextButton(
                 imageVector = null,
+                buttonText = "Play Again",
+                onClick = onPlayAgain
+            )
+
+            Spacer(Modifier.height(12.dp))
+
+            IconTextButton(
+                imageVector = null,
                 buttonText = "Start Over",
                 onClick = onStartOver
             )
@@ -139,7 +147,7 @@ fun ResultScreen(result: GameResult, onStartOver: () -> Unit) {
 }
 
 @Composable
-fun GameScreenHost(playerMode: PlayerMode, difficulty: Difficulty, onBackToMode: () -> Unit, onGameResult: (GameResult, List<CellState>) -> Unit) {
+fun GameScreenHost(playerMode: PlayerMode, difficulty: Difficulty, onBackToMode: () -> Unit, onGameResult: (GameResult) -> Unit) {
     Column(modifier = Modifier.fillMaxSize().background(MaterialTheme.colorScheme.background)) {
         Box(modifier = Modifier.fillMaxSize()) {
             ResponsiveTicTacToe(
@@ -160,7 +168,7 @@ private fun ResponsiveTicTacToe(
     isSinglePlayer: Boolean,
     difficulty: Difficulty,
     onExitToMode: () -> Unit,
-    onGameResult: (GameResult, List<CellState>) -> Unit
+    onGameResult: (GameResult) -> Unit
 ) {
     // game state
     var board by remember { mutableStateOf(List(9) { CellState.EMPTY }) }
@@ -215,11 +223,11 @@ private fun ResponsiveTicTacToe(
                 CellState.O -> GameResult.O_WIN
                 else -> GameResult.DRAW
             }
-            onGameResult(result, board)
+            onGameResult(result)
         } else if (board.none { it == CellState.EMPTY }) {
             // draw -> show result screen
             delay(1000)
-            onGameResult(GameResult.DRAW, board)
+            onGameResult(GameResult.DRAW)
         }
     }
 
