@@ -1,3 +1,5 @@
+import org.jetbrains.kotlin.gradle.dsl.JvmTarget
+
 plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.kotlin.android)
@@ -29,7 +31,9 @@ android {
 
     buildTypes {
         release {
-            isMinifyEnabled = false
+            isMinifyEnabled = true
+            isShrinkResources = true
+            isDebuggable = false
             proguardFiles(
                 getDefaultProguardFile("proguard-android-optimize.txt"),
                 "proguard-rules.pro"
@@ -37,21 +41,22 @@ android {
         }
     }
 
-    buildFeatures {
-        compose = true
-    }
-
-    composeOptions {
-        kotlinCompilerExtensionVersion = "1.5.14"
-    }
+    buildFeatures.compose = true
+    composeOptions.kotlinCompilerExtensionVersion = "1.5.14"
 
     compileOptions {
         sourceCompatibility = JavaVersion.VERSION_17
         targetCompatibility = JavaVersion.VERSION_17
     }
 
-    kotlinOptions {
-        jvmTarget = "17"
+    kotlin.compilerOptions.jvmTarget.set(JvmTarget.JVM_17)
+
+    /**From android 28, android studio don't compress apk classes. Also PlayStore compress it automatically for the user. And Google suggest to use app bundle for better optimizations.
+     * But our FieldX don't support app bundle, we are using legacy apk packaging systems to minimize unoptimized apk download from our server to minimize bandwidth.
+     * We have to do it because FieldX don't unpack apk and optimize it for users.*/
+    packaging {
+        dex.useLegacyPackaging = true
+        jniLibs.useLegacyPackaging = true
     }
 }
 
@@ -61,11 +66,11 @@ dependencies {
     implementation(libs.material)
     implementation(platform(libs.androidX.compose.bom))
     implementation(libs.androidX.compose.material3)
-    implementation(libs.androidX.compose.material.icon.extended)
     implementation(libs.androidX.compose.ui.tooling.preview)
     implementation(libs.androidX.activity.compose)
     implementation(libs.androidX.activity.ktx)
     implementation(libs.androidX.compose.ui)
+    implementation(libs.androidX.splashscreen)
     debugImplementation(libs.androidX.compose.ui.tooling)
     debugImplementation(libs.androidX.compose.animation)
     debugImplementation(libs.androidX.compose.foundation)
